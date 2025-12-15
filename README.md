@@ -1,13 +1,13 @@
 # CUDA Histogram Equalization for RGB Images
 
 ## Project Description
-This project implements a GPU-accelerated Histogram Equalization pipeline for RGB images using CUDA. Unlike standard grayscale equalization, this application preserves color information by converting images to the YCbCr color space, applying equalization only to the Luminance (Y) channel, and reconstructing the RGB image.
+This project implements a GPU-accelerated Histogram Equalization pipeline for RGB images using CUDA. Unlike standard grayscale equalization, this application preserves color information by converting images to the YCbCr color space(Y is brightness and Cb and Cr are the color of the image), applying equalization only to the Luminance (Y) channel, and reconstructing the RGB image.
 
 The pipeline performs the following steps:
 1.  **Load:** Reads RGB images (JPG, PNG) from an input directory using `stb_image`.
 2.  **Transfer:** Moves image data to GPU global memory.
 3.  **Histogram Calculation (Kernel):** Computes the histogram of the Y channel luminance.
-4.  **CDF Calculation (Host):** Calculates the Cumulative Distribution Function (CDF) on the CPU.
+4.  **CDF Calculation (Host):** Calculates the Cumulative Distribution Function (CDF) on the CPU.We need the CDF to map the YCbCr images back to the RGB gamut
 5.  **Equalization & Reconstruction (Kernel):** Maps old luminance values to new values using the CDF and converts YCbCr back to RGB in a single pass.
 6.  **Save:** Writes the processed images to an output directory.
 
@@ -50,3 +50,6 @@ nvcc main.cu -o histogram_eq -std=c++17
 * **"Folder 'input_dir' does not exist"**: The program expects the input folder to be in the exact working directory where you run the command.
 * **"Error writing to file"**: Ensure you have write permissions in the directory.
 * **Compile Errors**: If `std::filesystem` is not found, ensure you are adding the `-std=c++17` flag during compilation.
+
+![image before applying histogram equalization](image.png)
+![image after applying histogram equalization](output_image.png)

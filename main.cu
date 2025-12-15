@@ -97,7 +97,7 @@ int main() {
     std::string input_dir = "input_dir";
     std::string output_dir = "output_dir";
 
-    //directories from where we read and write files
+    //directories from where we read and write
     if (!fs::exists(input_dir)) {
         printf("CRITICAL ERROR: Folder '%s' does not exist.\n", input_dir.c_str());
         printf("Please create it and put images inside.\n");
