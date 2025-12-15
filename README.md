@@ -30,34 +30,23 @@ Use the NVIDIA CUDA Compiler (`nvcc`) to build the application. You must specify
 
 ```bash
 nvcc main.cu -o histogram_eq -std=c++17
+```
 
-Run
+## Run
+1.  **Prepare Input:** Ensure a folder named `input_dir` exists in the same directory as the executable and contains `.jpg` or `.png` images.
+    ```bash
+    mkdir -p input_dir
+    # Place images inside input_dir/
+    ```
 
-    Prepare Input: Ensure a folder named input_dir exists in the same directory as the executable and contains .jpg or .png images.
-    Bash
-
-mkdir -p input_dir
-# Place images inside input_dir/
-
-Execute: Run the compiled binary.
-Bash
-
+2.  **Execute:** Run the compiled binary.
+    ```bash
     ./histogram_eq
+    ```
 
-    Check Output: The processed images will be saved in output_dir/ with the prefix eq_.
+3.  **Check Output:** The processed images will be saved in `output_dir/` with the prefix `eq_`.
 
-Troubleshooting
-
-    "Folder 'input_dir' does not exist": The program expects the input folder to be in the exact working directory where you run the command.
-
-    "Error writing to file": Ensure you have write permissions in the directory.
-
-    Compile Errors: If std::filesystem is not found, ensure you are adding the -std=c++17 flag during compilation.
-
-
-Would you like me to adjust any specific section of this README or explain the build flags further?
-
-***
-**Source:**
-* README structure based on: [CUDA at Scale for the Enterprise Course Project Template](https://github.com/PascaleCourseraCourses/CUDAatScaleForTheEnterpriseCourseProjectTemplate)
-* Code logic based on user-provided `main.cu`.
+## Troubleshooting
+* **"Folder 'input_dir' does not exist"**: The program expects the input folder to be in the exact working directory where you run the command.
+* **"Error writing to file"**: Ensure you have write permissions in the directory.
+* **Compile Errors**: If `std::filesystem` is not found, ensure you are adding the `-std=c++17` flag during compilation.
