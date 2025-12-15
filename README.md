@@ -52,4 +52,6 @@ nvcc main.cu -o histogram_eq -std=c++17
 * **Compile Errors**: If `std::filesystem` is not found, ensure you are adding the `-std=c++17` flag during compilation.
 
 ![image before applying histogram equalization](image.png)
+image before applying histogram equalization
 ![image after applying histogram equalization](output_image.png)
+image after applying histogram equalization
