@@ -1,108 +1,63 @@
-CUDA Batch Image Histogram Equalizer
-Project Description
+# CUDA Histogram Equalization for RGB Images
 
-This project implements a high-performance, GPU-accelerated image processing pipeline using CUDA. It performs Histogram Equalization on a batch of images to enhance contrast and visibility, specifically targeting low-light or low-contrast datasets (e.g., medical X-rays, dark photography).
+## Project Description
+This project implements a GPU-accelerated Histogram Equalization pipeline for RGB images using CUDA. Unlike standard grayscale equalization, this application preserves color information by converting images to the YCbCr color space, applying equalization only to the Luminance (Y) channel, and reconstructing the RGB image.
 
-Unlike standard grayscale equalization, this application maintains color fidelity by converting images to the YCbCr color space, applying equalization only to the Luminance (Y) channel, and reconstructing the RGB image. This prevents the "washed out" look often associated with simple global equalization.
+The pipeline performs the following steps:
+1.  **Load:** Reads RGB images (JPG, PNG) from an input directory using `stb_image`.
+2.  **Transfer:** Moves image data to GPU global memory.
+3.  **Histogram Calculation (Kernel):** Computes the histogram of the Y channel luminance.
+4.  **CDF Calculation (Host):** Calculates the Cumulative Distribution Function (CDF) on the CPU.
+5.  **Equalization & Reconstruction (Kernel):** Maps old luminance values to new values using the CDF and converts YCbCr back to RGB in a single pass.
+6.  **Save:** Writes the processed images to an output directory.
 
-The application is designed for scale:
+## Code Organization
+The project directory is organized as follows:
+* `main.cu`: The main source file containing C++ host code and CUDA kernels.
+* `stb_image.h`: Single-header library for loading images.
+* `stb_image_write.h`: Single-header library for writing images.
+* `input_dir/`: Directory containing input images to be processed (user created).
+* `output_dir/`: Directory where processed images will be saved (automatically created).
 
-    It supports batch processing (handling hundreds of images in a single run).
+## Dependencies
+To build and run this project, the following are required:
+* **NVIDIA CUDA Toolkit**: (v10.0 or higher recommended)
+* **C++ Compiler**: Must support C++17 standard (e.g., `g++` 7+, `MSVC` 19.14+, `Clang` 5+) for `std::filesystem`.
+* **STB Libraries**: `stb_image.h` and `stb_image_write.h` (included in source).
 
-    It utilizes memory reuse optimization (allocating GPU memory once per batch rather than per image) to maximize throughput.
+## Build
+Use the NVIDIA CUDA Compiler (`nvcc`) to build the application. You must specify the C++17 standard.
 
-Prerequisites
+```bash
+nvcc main.cu -o histogram_eq -std=c++17
 
-To build and run this project, you need the following environment:
+Run
 
-    OS: Linux (Arch, Ubuntu, etc.) or Windows (with Visual Studio).
-
-    Hardware: NVIDIA GPU with Compute Capability 3.0 or higher.
-
-    Software:
-
-        NVIDIA CUDA Toolkit (v11.0 or higher recommended).
-
-        C++ Compiler supporting C++17 (e.g., g++, cl.exe).
-
-        make (optional, if using a Makefile).
-
-Libraries:
-
-    Standard Libraries: <filesystem> (Requires C++17), <iostream>, <vector>, <cuda_runtime.h>.
-
-    External Libraries: stb_image.h and stb_image_write.h (Included as header-only libraries for image I/O).
-
-Directory Structure
-
-Ensure your project folder is organized as follows before running:
-
-.
-├── main.cu                # The main CUDA source code
-├── stb_image.h            # Image loading library
-├── stb_image_write.h      # Image saving library
-├── README.md              # This documentation
-├── input_dir/             # Place your input images here (.jpg, .png, .jpeg)
-└── output_dir/            # (Created automatically) Processed images appear here
-
-Build Instructions
-
-You can compile the project using nvcc (NVIDIA Cuda Compiler). Since the code uses the C++17 filesystem standard, you must specify the standard version.
-
-Run the following command in your terminal:
-Bash
-
-nvcc main.cu -o histogram_eq -std=c++17 -lm
-
-    -o histogram_eq: Names the executable histogram_eq.
-
-    -std=c++17: Enables filesystem support.
-
-    -lm: Links the math library (required for fminf, fmaxf, etc.).
-
-Run Instructions
-
-    Prepare Data: Place your dataset images (JPEG or PNG) into a folder named input_dir in the same directory as your executable.
+    Prepare Input: Ensure a folder named input_dir exists in the same directory as the executable and contains .jpg or .png images.
     Bash
 
 mkdir -p input_dir
-# Copy your images into input_dir/
+# Place images inside input_dir/
 
-Execute: Run the compiled binary:
+Execute: Run the compiled binary.
 Bash
 
     ./histogram_eq
 
-    View Results: The program will automatically create a folder named output_dir and save the enhanced images there with the prefix eq_.
+    Check Output: The processed images will be saved in output_dir/ with the prefix eq_.
 
-Implementation Details
+Troubleshooting
 
-The pipeline consists of three main stages, offloading heavy computation to the GPU:
+    "Folder 'input_dir' does not exist": The program expects the input folder to be in the exact working directory where you run the command.
 
-    Preprocessing (Kernel 1):
+    "Error writing to file": Ensure you have write permissions in the directory.
 
-        Images are loaded as RGB.
+    Compile Errors: If std::filesystem is not found, ensure you are adding the -std=c++17 flag during compilation.
 
-        A custom CUDA kernel converts RGB pixels to YCbCr on the fly.
 
-        An Atomic Histogram calculation is performed on the Y (Luminance) channel using atomicAdd to handle parallel thread contention.
+Would you like me to adjust any specific section of this README or explain the build flags further?
 
-    CPU Analysis:
-
-        The histogram (256 integers) is downloaded to the CPU.
-
-        The Cumulative Distribution Function (CDF) is calculated serially. (This step is performed on the CPU as it is computationally trivial for 256 elements and avoids the complexity of a parallel scan algorithm).
-
-    Postprocessing (Kernel 2):
-
-        The CDF map is uploaded back to the GPU.
-
-        A second kernel applies the equalization mapping to the Y channel.
-
-        The image is converted back to RGB using the new Y value and the original Cb/Cr values to preserve color details.
-
-Performance
-
-    Parallelism: Each image is processed by thousands of GPU threads simultaneously (one thread per pixel).
-
-    Memory Management: GPU memory (cudaMalloc) is allocated only once at the start of the program for the maximum supported resolution (4K). This buffer is reused for every image in the batch, eliminating the significant latency overhead of memory allocation during the loop.
+***
+**Source:**
+* README structure based on: [CUDA at Scale for the Enterprise Course Project Template](https://github.com/PascaleCourseraCourses/CUDAatScaleForTheEnterpriseCourseProjectTemplate)
+* Code logic based on user-provided `main.cu`.
